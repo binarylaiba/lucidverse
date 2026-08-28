@@ -1,0 +1,14 @@
+{
+  "name": "lucid-ai",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "npm --prefix aetherdream run dev",
+    "build": "npm --prefix aetherdream run build",
+    "preview": "npm --prefix aetherdream run preview",
+    "server:dev": "npm --prefix server run dev",
+    "server:build": "npm --prefix server run build",
+    "server:start": "npm --prefix server run start",
+    "server:typecheck": "npm --prefix server run typecheck"
+  }
+}

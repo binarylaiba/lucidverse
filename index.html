@@ -1,0 +1,1985 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+    <title>AetherDream - Cinematic AI Dreamscape Explorer</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <!-- Google Fonts & Material Symbols -->
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,300..900;1,6..96,300..900&family=Geist:wght@100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Syne:wght@400..800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <!-- Three.js and GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container-high": "#23293c",
+                        "background": "#0c1324",
+                        "primary": "#d2bbff",
+                        "surface-container-low": "#151b2d",
+                        "surface-dim": "#0c1324",
+                        "on-secondary-container": "#004d44",
+                        "inverse-surface": "#dce1fb",
+                        "error": "#ffb4ab",
+                        "secondary-fixed": "#62fae3",
+                        "inverse-on-surface": "#2a3043",
+                        "on-secondary-fixed-variant": "#005047",
+                        "tertiary": "#ffafd3",
+                        "secondary-fixed-dim": "#3cddc7",
+                        "on-primary": "#3f008e",
+                        "on-error-container": "#ffdad6",
+                        "on-background": "#dce1fb",
+                        "tertiary-fixed": "#ffd8e7",
+                        "primary-fixed": "#eaddff",
+                        "surface-variant": "#2e3447",
+                        "outline-variant": "#4a4455",
+                        "surface": "#0c1324",
+                        "on-tertiary-container": "#ffdce9",
+                        "tertiary-container": "#ae397b",
+                        "primary-container": "#7c3aed",
+                        "on-tertiary": "#620040",
+                        "on-tertiary-fixed": "#3d0026",
+                        "on-primary-fixed-variant": "#5a00c6",
+                        "surface-container-highest": "#2e3447",
+                        "tertiary-fixed-dim": "#ffafd3",
+                        "on-secondary": "#003731",
+                        "on-error": "#690005",
+                        "surface-container": "#191f31",
+                        "surface-tint": "#d2bbff",
+                        "on-surface": "#dce1fb",
+                        "error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#85145a",
+                        "surface-container-lowest": "#070d1f",
+                        "on-secondary-fixed": "#00201c",
+                        "secondary": "#44e2cd",
+                        "on-primary-fixed": "#25005a",
+                        "surface-bright": "#33394c",
+                        "primary-fixed-dim": "#d2bbff",
+                        "on-surface-variant": "#ccc3d8",
+                        "outline": "#958da1",
+                        "inverse-primary": "#732ee4",
+                        "on-primary-container": "#ede0ff",
+                        "secondary-container": "#03c6b2"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "sm": "0.125rem",
+                        "md": "0.25rem",
+                        "lg": "0.375rem",
+                        "xl": "0.5rem",
+                        "2xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "container-max-width": "1440px",
+                        "void-margin": "4rem",
+                        "telemetry-gap": "0.5rem",
+                        "portal-gutter": "2rem"
+                    },
+                    fontFamily: {
+                        "body-sm": ["Geist", "sans-serif"],
+                        "body-md": ["Geist", "sans-serif"],
+                        "headline-lg-mobile": ["Bodoni Moda", "serif"],
+                        "display-hero": ["Bodoni Moda", "serif"],
+                        "headline-lg": ["Bodoni Moda", "serif"],
+                        "telemetry-label": ["JetBrains Mono", "monospace"],
+                        "syne": ["Syne", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        ::selection { background: rgba(124, 58, 237, 0.4); color: #dce1fb; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #070d1f; }
+        ::-webkit-scrollbar-thumb { background: rgba(210, 187, 255, 0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(210, 187, 255, 0.5); }
+
+        .bloom-primary { transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .bloom-primary:hover {
+            box-shadow: 0 0 25px rgba(210, 187, 255, 0.45), 0 0 50px rgba(124, 58, 237, 0.2);
+            border-color: rgba(210, 187, 255, 0.85);
+            transform: translateY(-1px);
+        }
+
+        .bloom-secondary { transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .bloom-secondary:hover {
+            box-shadow: 0 0 25px rgba(68, 226, 205, 0.4), 0 0 45px rgba(3, 198, 178, 0.2);
+            border-color: rgba(68, 226, 205, 0.8);
+            transform: translateY(-1px);
+        }
+
+        .glass-portal {
+            background: rgba(12, 19, 36, 0.4);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 0.5px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-portal-active {
+            background: rgba(18, 28, 54, 0.65);
+            backdrop-filter: blur(45px);
+            -webkit-backdrop-filter: blur(45px);
+            border: 1px solid rgba(68, 226, 205, 0.65);
+            box-shadow: 0 0 30px rgba(68, 226, 205, 0.25), inset 0 0 15px rgba(68, 226, 205, 0.1);
+        }
+
+        .glass-modal {
+            background: rgba(8, 13, 27, 0.88);
+            backdrop-filter: blur(60px);
+            -webkit-backdrop-filter: blur(60px);
+            border: 1px solid rgba(210, 187, 255, 0.25);
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.85), 0 0 40px rgba(124, 58, 237, 0.2);
+        }
+
+        .pulse-dot { animation: pulse-op 2.4s infinite cubic-bezier(0.4, 0, 0.6, 1); }
+        @keyframes pulse-op {
+            0%, 100% { opacity: 0.35; transform: scale(0.9); }
+            50% { opacity: 1; transform: scale(1.15); box-shadow: 0 0 12px rgba(68, 226, 205, 0.9); }
+        }
+
+        .pulse-dot-violet { animation: pulse-violet 2.8s infinite cubic-bezier(0.4, 0, 0.6, 1); }
+        @keyframes pulse-violet {
+            0%, 100% { opacity: 0.4; transform: scale(0.95); }
+            50% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 14px rgba(210, 187, 255, 0.9); }
+        }
+
+        .horizon-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(210, 187, 255, 0.2) 20%, rgba(68, 226, 205, 0.3) 50%, rgba(210, 187, 255, 0.2) 80%, transparent);
+            width: 100%;
+        }
+
+        .telemetry-line {
+            background: linear-gradient(90deg, rgba(68, 226, 205, 0.6), transparent);
+            height: 1px;
+        }
+
+        @keyframes sheen {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(200%) rotate(45deg); }
+        }
+        .sheen-active::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(60deg, transparent 30%, rgba(255, 255, 255, 0.08) 50%, transparent 70%);
+            animation: sheen 6s infinite ease-in-out;
+            pointer-events: none;
+        }
+
+        .chip-glow {
+            background: rgba(12, 19, 36, 0.6);
+            border: 0.5px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.3s ease;
+        }
+        .chip-glow:hover {
+            background: rgba(124, 58, 237, 0.2);
+            border-color: rgba(210, 187, 255, 0.6);
+            color: #d2bbff;
+            transform: translateY(-1px);
+        }
+
+        .audio-bar {
+            width: 2px;
+            height: 10px;
+            background-color: #44e2cd;
+            border-radius: 1px;
+            animation: soundWave 1.2s infinite ease-in-out alternate;
+        }
+        .audio-bar:nth-child(2) { animation-delay: 0.2s; height: 16px; }
+        .audio-bar:nth-child(3) { animation-delay: 0.4s; height: 8px; }
+        .audio-bar:nth-child(4) { animation-delay: 0.1s; height: 14px; }
+        @keyframes soundWave {
+            0% { height: 4px; opacity: 0.4; }
+            100% { height: 18px; opacity: 1; }
+        }
+        .audio-paused .audio-bar {
+            animation-play-state: paused;
+            height: 3px !important;
+            opacity: 0.3;
+        }
+
+        /* Generation Hologram Shimmer */
+        @keyframes holoScan {
+            0% { transform: translateY(-100%); opacity: 0; }
+            50% { opacity: 0.6; }
+            100% { transform: translateY(100%); opacity: 0; }
+        }
+        .holo-scanline {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 0%, rgba(68, 226, 205, 0.15) 50%, transparent 100%);
+            animation: holoScan 3s infinite linear;
+            pointer-events: none;
+        }
+
+        /* 3D Entity Hover Indicator Pill */
+        .entity-beacon {
+            transform: translate(-50%, -100%);
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface overflow-x-hidden min-h-screen selection:bg-primary-container selection:text-on-primary-container flex flex-col relative font-body-md">
+
+    <!-- Global Background Shader Layer: Deep Void, Celestial Moon & Volumetric Mist -->
+    <div class="fixed inset-0 z-[-2] w-full h-full pointer-events-none">
+        <canvas id="shader-canvas-ANIMATION_2" class="w-full h-full block opacity-80"></canvas>
+    </div>
+
+    <!-- Global Three.js Scene: Floating Faceted Crystals, Interactive AI Objects, Characters & Stardust -->
+    <div class="fixed inset-0 z-[-1] w-full h-full cursor-crosshair">
+        <div id="threejs-container-ANIMATION_3" class="w-full h-full block opacity-90"></div>
+    </div>
+
+    <!-- 2D Overlay for 3D Entity Hover Labels (Spatial Telemetry Beacons) -->
+    <div id="spatialOverlay" class="fixed inset-0 pointer-events-none z-20"></div>
+
+    <!-- Soft Radial Vignette Overlay -->
+    <div class="fixed inset-0 z-[-1] w-full h-full pointer-events-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/5 via-background/60 to-background"></div>
+
+    <!-- TOP NAVIGATION -->
+    <header class="fixed top-0 left-0 w-full z-50 backdrop-blur-xl border-b border-outline-variant/15 bg-transparent transition-all duration-300 transform translate-y-0" id="topNav">
+        <div class="flex justify-between items-center px-portal-gutter py-4 md:py-5 w-full max-w-container-max-width mx-auto">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-4 cursor-pointer group" onclick="resetToDreamHome()">
+                <div class="w-8 h-8 rounded-lg border border-primary/40 flex items-center justify-center bg-primary/10 group-hover:border-primary group-hover:shadow-[0_0_15px_rgba(210,187,255,0.4)] transition-all">
+                    <span class="material-symbols-outlined text-primary text-lg transition-transform group-hover:rotate-45">all_inclusive</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-display-hero text-2xl md:text-3xl text-primary tracking-wider font-light" id="navBrandText">AETHERDREAM</span>
+                    <span class="font-telemetry-label text-[8px] text-secondary tracking-[0.25em] -mt-1 hidden sm:block" id="navSubBrand">AI DREAM SYNTHESIZER v2.8</span>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="hidden lg:flex gap-8 items-center font-telemetry-label text-xs tracking-widest">
+                <a class="text-primary font-bold border-b border-primary pb-1 duration-300 flex items-center gap-1.5" href="#drift" id="nav-drift">
+                    <span class="w-1.5 h-1.5 rounded-full bg-primary pulse-dot-violet"></span>
+                    DRIFT
+                </a>
+                <a class="text-on-surface-variant hover:text-secondary hover:drop-shadow-[0_0_8px_rgba(68,226,205,0.5)] transition-all duration-300" href="#weave" onclick="openWeaveModal(event)">WEAVE</a>
+                <a class="text-on-surface-variant hover:text-secondary hover:drop-shadow-[0_0_8px_rgba(68,226,205,0.5)] transition-all duration-300" href="#chronicle" onclick="toggleStoryChronicle(event)">CHRONICLE</a>
+                <a class="text-on-surface-variant hover:text-secondary hover:drop-shadow-[0_0_8px_rgba(68,226,205,0.5)] transition-all duration-300" href="#entities" onclick="focusOnEntities(event)">ENTITIES</a>
+                <a class="text-on-surface-variant hover:text-secondary hover:drop-shadow-[0_0_8px_rgba(68,226,205,0.5)] transition-all duration-300" href="#soundscape" onclick="toggleAudioAmbience(event)">HARMONICS</a>
+            </nav>
+
+            <!-- Action Controls & Ambience Toggle -->
+            <div class="flex items-center gap-3 md:gap-4">
+                <!-- Binaural Dream Ambient Sound Generator -->
+                <button id="audioAmbienceBtn" onclick="toggleAudioAmbience()" title="Toggle Ethereal Harmonic Dream Soundscape" class="flex items-center gap-2 text-xs font-telemetry-label px-3 py-1.5 rounded border border-outline-variant/30 text-on-surface-variant hover:border-secondary/60 hover:text-secondary transition-all audio-paused bg-background/50 backdrop-blur-md">
+                    <div class="flex items-center gap-0.5 h-4" id="audioWaves">
+                        <span class="audio-bar"></span>
+                        <span class="audio-bar"></span>
+                        <span class="audio-bar"></span>
+                        <span class="audio-bar"></span>
+                    </div>
+                    <span class="text-[10px] hidden sm:inline" id="audioStatusText">432Hz HARMONIC</span>
+                </button>
+
+                <!-- API Key Configuration Modal Trigger -->
+                <button onclick="openApiConfigModal()" title="Configure OpenAI API Key" class="p-1.5 rounded border border-outline-variant/30 text-outline hover:text-primary hover:border-primary/50 transition-all bg-surface-container-low/40">
+                    <span class="material-symbols-outlined text-sm">key</span>
+                </button>
+
+                <!-- Aether AI Assistant Trigger -->
+                <button onclick="openWeaveModal()" class="hidden sm:flex items-center gap-2 text-primary font-telemetry-label text-xs tracking-widest hover:text-secondary transition-colors border border-outline-variant/30 px-3.5 py-1.5 rounded bloom-primary bg-primary/5">
+                    <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+                    <span>WEAVE AI</span>
+                </button>
+
+                <!-- Avatar Profile -->
+                <div class="w-9 h-9 rounded-full bg-surface-variant border border-outline-variant/40 overflow-hidden cursor-pointer hover:border-primary transition-all p-0.5 hover:shadow-[0_0_12px_rgba(210,187,255,0.5)]" title="Neural Link: Connected">
+                    <img class="w-full h-full object-cover rounded-full" alt="Cyber-ethereal explorer profile avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3ZWmk5atnJz-sAyCdl-NiuSZZUs5S1PUCDHLD-GQoOiJse-Faavq5zzch_-ocqOAPdtxiogji-tOFPNM5a7zvMvFhmYc9GO6c2oo2X5kktO2T23LsiQfYKL3LG401_23s0umffQKpW7F53Wtrqps069vDwx6LNEI2p7jgxOsYEq8mkqRX2cCoj3-698V4S3t0tv7Ikz2nBGSRzKvkvhG1PxRFFAFiy4UHJfAGeRqjqpGU-tGbguhpGA"/>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button class="lg:hidden text-on-surface p-1 rounded hover:text-primary transition-colors" onclick="toggleMobileMenu()" id="mobileMenuBtn">
+                    <span class="material-symbols-outlined text-2xl">menu</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Drawer Navigation -->
+        <div id="mobileDrawer" class="hidden lg:hidden border-b border-outline-variant/20 bg-background/95 backdrop-blur-2xl px-6 py-4 flex flex-col gap-4 font-telemetry-label text-sm">
+            <a class="text-primary flex items-center justify-between py-2 border-b border-outline-variant/10" href="#drift" onclick="toggleMobileMenu()">
+                <span>DRIFT (EXPLORE)</span>
+                <span class="material-symbols-outlined text-sm">explore</span>
+            </a>
+            <a class="text-on-surface-variant hover:text-secondary flex items-center justify-between py-2 border-b border-outline-variant/10" href="#weave" onclick="openWeaveModal(); toggleMobileMenu();">
+                <span>WEAVE NEW DREAM</span>
+                <span class="material-symbols-outlined text-sm">gesture</span>
+            </a>
+            <a class="text-on-surface-variant hover:text-secondary flex items-center justify-between py-2 border-b border-outline-variant/10" href="#chronicle" onclick="toggleStoryChronicle(); toggleMobileMenu();">
+                <span>DREAM CHRONICLE</span>
+                <span class="material-symbols-outlined text-sm">auto_stories</span>
+            </a>
+            <a class="text-on-surface-variant hover:text-secondary flex items-center justify-between py-2 border-b border-outline-variant/10" href="#entities" onclick="focusOnEntities(); toggleMobileMenu();">
+                <span>INTERACTIVE ENTITIES</span>
+                <span class="material-symbols-outlined text-sm">view_in_ar</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- MAIN IMMERSIVE CONTENT -->
+    <main class="flex-grow pt-24 md:pt-32 pb-16 md:px-void-margin px-4 relative z-10 transition-opacity duration-700" id="mainExperience">
+        <div class="max-w-container-max-width mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start min-h-[72vh]">
+            
+            <!-- LEFT: Hero & Dream Prompt Portal -->
+            <div class="lg:col-span-6 flex flex-col gap-5 md:gap-6" id="heroContent">
+                
+                <!-- Status Telemetry Badges -->
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="flex items-center gap-2 px-2.5 py-1 rounded bg-surface-container-low/80 border border-outline-variant/30 backdrop-blur-md">
+                        <div class="w-2 h-2 rounded-full bg-secondary pulse-dot" id="livePulseDot"></div>
+                        <span class="font-telemetry-label text-telemetry-label text-secondary tracking-widest" id="engineStatusTag">REAL-TIME DREAM ENGINE</span>
+                    </div>
+                    <span class="font-telemetry-label text-[10px] text-primary/90 px-2.5 py-1 rounded bg-primary/10 border border-primary/20 backdrop-blur-md" id="dreamMoodTag">MOOD: ETHEREAL</span>
+                    <span class="font-telemetry-label text-[10px] text-outline px-2.5 py-1 rounded bg-surface-container-low border border-outline-variant/20 ml-auto hidden sm:inline-block" id="lucidityBadge">COHERENCE: 96.8%</span>
+                </div>
+
+                <!-- Hero Title & Sub-heading -->
+                <div class="flex flex-col gap-2">
+                    <h1 class="font-display-hero text-3xl sm:text-5xl md:text-6xl lg:text-[68px] lg:leading-[76px] text-on-surface tracking-tight" id="heroTitle">
+                        Enter the dream <br class="hidden sm:block"/><span class="italic text-primary font-normal" id="heroTitleSub">beyond reality.</span>
+                    </h1>
+                </div>
+
+                <!-- Cinematic Description / AI Lore snippet -->
+                <p class="font-body-md text-sm md:text-base text-on-surface-variant max-w-xl font-light leading-relaxed" id="dreamStorySnippet">
+                    Explore impossible dimensions, weave living dreamscapes, and navigate an infinite subconscious universe rendered through neural resonance. The void is listening.
+                </p>
+
+                <!-- Primary Action CTAs -->
+                <div class="flex flex-col sm:flex-row gap-3.5 mt-1" id="ctaButtonGroup">
+                    <button onclick="triggerExploreDive()" id="exploreBtn" class="px-7 py-3.5 border border-primary/60 text-primary font-telemetry-label text-telemetry-label tracking-widest rounded bloom-primary transition-all duration-300 flex items-center justify-center gap-2.5 bg-primary/10 group relative overflow-hidden sheen-active">
+                        <span class="material-symbols-outlined text-lg transition-transform group-hover:scale-125" id="exploreBtnIcon">explore</span>
+                        <span id="exploreBtnText">EXPLORE THIS REALM</span>
+                    </button>
+                    
+                    <button onclick="openWeaveModal()" class="px-7 py-3.5 border border-outline-variant/30 text-on-surface font-telemetry-label text-telemetry-label tracking-widest rounded hover:border-secondary/60 hover:text-secondary bloom-secondary transition-all duration-300 flex items-center justify-center gap-2.5 bg-surface-container-lowest/40 backdrop-blur-sm group">
+                        <span class="material-symbols-outlined text-lg transition-transform group-hover:rotate-12">gesture</span>
+                        <span>WEAVE NEW DREAM</span>
+                    </button>
+                </div>
+
+                <!-- Neural Dream Prompt Input Bar -->
+                <div class="mt-3 relative group" id="dreamInputContainer">
+                    <div class="absolute -top-3 left-4 bg-background/90 px-2.5 py-0.5 rounded flex items-center gap-2 z-10 border border-primary/20 backdrop-blur-md">
+                        <div class="w-1.5 h-1.5 rounded-full bg-primary pulse-dot-violet" id="neuralInputDot"></div>
+                        <span class="font-telemetry-label text-primary/80 text-[9px] tracking-widest" id="inputStatusText">AI DREAM PROMPT</span>
+                    </div>
+                    
+                    <form onsubmit="handleDreamSubmit(event)" class="glass-portal rounded-lg p-1.5 relative overflow-hidden transition-all duration-500 group-focus-within:border-primary/60 group-focus-within:bg-surface-container-high/60 group-focus-within:shadow-[0_0_30px_rgba(210,187,255,0.2)] flex items-center">
+                        <input id="dreamPromptInput" class="w-full bg-transparent border-none text-on-surface font-body-md focus:ring-0 px-4 py-3.5 placeholder-on-surface-variant/35 caret-secondary text-sm md:text-base outline-none" placeholder="Describe the subconscious world you want to create..." type="text" autocomplete="off"/>
+                        
+                        <button type="submit" id="generateSubmitBtn" class="px-4 py-2.5 mr-1 rounded border border-secondary/40 bg-secondary/15 hover:bg-secondary/30 text-secondary transition-all duration-300 flex items-center gap-1.5 font-telemetry-label text-xs tracking-wider group/btn" title="Synthesize Dreamscape via AI">
+                            <span class="material-symbols-outlined text-sm transition-transform group-hover/btn:rotate-45" id="genBtnIcon">auto_fix_high</span>
+                            <span class="hidden sm:inline" id="genBtnText">SYNTHESIZE</span>
+                        </button>
+                    </form>
+
+                    <!-- Subconscious Seed Suggestions -->
+                    <div class="flex flex-wrap items-center gap-2 mt-3">
+                        <span class="font-telemetry-label text-[9px] text-outline/60 tracking-wider">SEEDS:</span>
+                        <button onclick="injectDreamSeed('A shimmering crystal sanctuary floating above an infinite violet ocean with ancient glowing monoliths and chronos portals')" class="chip-glow px-2.5 py-1 rounded text-[11px] font-telemetry-label text-on-surface-variant/80">
+                            Crystal Sanctuary
+                        </button>
+                        <button onclick="injectDreamSeed('Deep midnight cyber-abyss filled with bioluminescent floating islands, neural rain, and wandering astral avatars')" class="chip-glow px-2.5 py-1 rounded text-[11px] font-telemetry-label text-on-surface-variant/80">
+                            Bioluminescent Cyber-Abyss
+                        </button>
+                        <button onclick="injectDreamSeed('An ethereal library of forgotten stars where floating fractal monoliths whisper lost cosmic memories')" class="chip-glow px-2.5 py-1 rounded text-[11px] font-telemetry-label text-on-surface-variant/80 hidden sm:inline-block">
+                            Fractal Astral Library
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT: Active Dream Entities, Dimensions & Telemetry Deck -->
+            <div class="lg:col-span-6 flex flex-col gap-4 relative" id="dimensionsSection">
+                
+                <!-- Telemetry Coordinates & Live Status Header -->
+                <div class="flex justify-between items-end pb-2 border-b border-outline-variant/15">
+                    <div class="flex items-center gap-2">
+                        <span class="font-telemetry-label text-xs text-primary tracking-widest font-semibold" id="rightPanelTitle">INTERACTIVE SCENE ENTITIES</span>
+                        <span class="font-telemetry-label text-[9px] text-secondary px-1.5 py-0.5 rounded bg-secondary/10 border border-secondary/20" id="entityCountBadge">3 OBJECTS • 2 ENTITIES</span>
+                    </div>
+                    <div class="flex items-center gap-3 font-telemetry-label text-[9px] text-outline/70">
+                        <span id="coordTelemetry">COORD: 44.928°N, 12.094°W</span>
+                        <span class="text-secondary" id="signalStrength">SIG: 99.4%</span>
+                    </div>
+                </div>
+
+                <!-- Interactive 3D Entities HUD List -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="entitiesGrid">
+                    <!-- Dynamic entity cards inserted here via JS -->
+                </div>
+
+                <!-- Neural Telemetry Gauges Card -->
+                <div class="glass-portal rounded-xl p-4.5 flex flex-col gap-3 relative overflow-hidden border border-outline-variant/25">
+                    <div class="flex justify-between items-center">
+                        <span class="font-telemetry-label text-xs text-on-surface tracking-wider font-semibold flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-secondary text-sm">monitor_heart</span>
+                            NEURAL TELEMETRY FLUX
+                        </span>
+                        <span class="font-telemetry-label text-[10px] text-primary" id="telemetryStateBadge">STATE: PRIME SYNCHRONIZED</span>
+                    </div>
+
+                    <!-- 4 Live Telemetry Metrics -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                        <div class="p-2.5 rounded-lg bg-surface-container-low/70 border border-outline-variant/20 flex flex-col items-center">
+                            <span class="font-telemetry-label text-[9px] text-outline">COHERENCE</span>
+                            <span class="font-telemetry-label text-sm sm:text-base text-secondary font-bold mt-0.5" id="telemetryCoherence">96.8%</span>
+                            <div class="w-full bg-outline-variant/20 h-1 rounded-full mt-1.5 overflow-hidden">
+                                <div id="barCoherence" class="bg-secondary h-full rounded-full transition-all duration-700" style="width: 96%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="p-2.5 rounded-lg bg-surface-container-low/70 border border-outline-variant/20 flex flex-col items-center">
+                            <span class="font-telemetry-label text-[9px] text-outline">STABILITY</span>
+                            <span class="font-telemetry-label text-sm sm:text-base text-primary font-bold mt-0.5" id="telemetryStability">PRIME</span>
+                            <div class="w-full bg-outline-variant/20 h-1 rounded-full mt-1.5 overflow-hidden">
+                                <div id="barStability" class="bg-primary h-full rounded-full transition-all duration-700" style="width: 92%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="p-2.5 rounded-lg bg-surface-container-low/70 border border-outline-variant/20 flex flex-col items-center">
+                            <span class="font-telemetry-label text-[9px] text-outline">FREQUENCY</span>
+                            <span class="font-telemetry-label text-sm sm:text-base text-on-surface font-bold mt-0.5" id="telemetryFrequency">432.0 Hz</span>
+                            <div class="w-full bg-outline-variant/20 h-1 rounded-full mt-1.5 overflow-hidden">
+                                <div id="barFrequency" class="bg-[#d2bbff] h-full rounded-full transition-all duration-700" style="width: 65%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="p-2.5 rounded-lg bg-surface-container-low/70 border border-outline-variant/20 flex flex-col items-center">
+                            <span class="font-telemetry-label text-[9px] text-outline">DEPTH</span>
+                            <span class="font-telemetry-label text-sm sm:text-base text-tertiary font-bold mt-0.5" id="telemetryDepth">88.5%</span>
+                            <div class="w-full bg-outline-variant/20 h-1 rounded-full mt-1.5 overflow-hidden">
+                                <div id="barDepth" class="bg-tertiary h-full rounded-full transition-all duration-700" style="width: 88%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dream Color Palette Bar -->
+                <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-surface-container-low/50 border border-outline-variant/20 text-xs font-telemetry-label">
+                    <span class="text-outline text-[10px]">ACTIVE DREAM PALETTE:</span>
+                    <div class="flex items-center gap-2" id="palettePreview">
+                        <div class="flex items-center gap-1.5" title="Primary Color">
+                            <span class="w-3 h-3 rounded-full border border-white/20 shadow-sm" id="palColor1" style="background-color: #7c3aed;"></span>
+                            <span class="text-[9px] text-outline" id="palHex1">#7C3AED</span>
+                        </div>
+                        <div class="flex items-center gap-1.5" title="Secondary Color">
+                            <span class="w-3 h-3 rounded-full border border-white/20 shadow-sm" id="palColor2" style="background-color: #44e2cd;"></span>
+                            <span class="text-[9px] text-outline" id="palHex2">#44E2CD</span>
+                        </div>
+                        <div class="flex items-center gap-1.5" title="Accent Color">
+                            <span class="w-3 h-3 rounded-full border border-white/20 shadow-sm" id="palColor3" style="background-color: #ffd8e7;"></span>
+                            <span class="text-[9px] text-outline" id="palHex3">#FFD8E7</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- HORIZON TELEMETRY DIVIDER -->
+    <div class="horizon-divider my-2 max-w-container-max-width mx-auto flex items-center justify-between px-void-margin relative z-10">
+        <span class="font-telemetry-label text-[9px] text-outline bg-background/80 px-2.5 py-0.5 rounded border border-outline-variant/20" id="thetaTelemetry">THETA FLUX: 4.5Hz - 8.0Hz</span>
+        <span class="font-telemetry-label text-[9px] text-secondary bg-background/80 px-2.5 py-0.5 rounded border border-secondary/30" id="bottomFreqIndicator">CARRIER FREQ: 432.0Hz HARMONIC</span>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-surface-container-lowest/80 backdrop-blur-md border-t border-outline-variant/10 w-full py-8 relative z-10">
+        <div class="flex flex-col md:flex-row justify-between items-center px-portal-gutter gap-4 max-w-container-max-width mx-auto">
+            <div class="flex items-center gap-3">
+                <span class="font-display-hero text-lg text-on-surface tracking-wider">AETHERDREAM</span>
+                <span class="text-outline/40">|</span>
+                <span class="font-telemetry-label text-[10px] text-secondary">AI DREAM ENGINE • OPENAI NEURAL CONNECT</span>
+            </div>
+            <nav class="flex flex-wrap gap-6 font-telemetry-label text-xs text-outline">
+                <a class="hover:text-primary transition-colors opacity-80 hover:opacity-100" href="#protocol" onclick="showNotification('Neural Protocol: Quantum Encrypted Subconscious Link.')">Neural Protocol</a>
+                <a class="hover:text-primary transition-colors opacity-80 hover:opacity-100" href="#ethics" onclick="showNotification('Safety: Subconscious Lucidity Guardrails active.')">Lucidity Guardrails</a>
+                <a class="hover:text-primary transition-colors opacity-80 hover:opacity-100" href="#chronicle" onclick="toggleStoryChronicle(event)">Full Dream Chronicle</a>
+            </nav>
+        </div>
+    </footer>
+
+    <!-- ======================================================== -->
+    <!-- MODALS & CONTEXTUAL PANELS                               -->
+    <!-- ======================================================== -->
+
+    <!-- 1. CONTEXTUAL OBJECT / CHARACTER INSPECTOR MODAL -->
+    <div id="inspectorModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-2xl opacity-0 pointer-events-none transition-all duration-400">
+        <div class="glass-modal w-full max-w-lg rounded-2xl p-6 sm:p-7 relative overflow-hidden flex flex-col gap-5 transform scale-95 transition-transform duration-400" id="inspectorModalContent">
+            <button onclick="closeInspectorModal()" class="absolute top-5 right-5 text-outline hover:text-primary transition-colors p-1.5 rounded-full bg-surface-container-low border border-outline-variant/30">
+                <span class="material-symbols-outlined text-base">close</span>
+            </button>
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-secondary/15 border border-secondary/40 flex items-center justify-center text-secondary" id="inspectIconBox">
+                    <span class="material-symbols-outlined text-xl" id="inspectIcon">view_in_ar</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-telemetry-label text-[10px] text-secondary tracking-widest" id="inspectCategory">3D SCENE OBJECT</span>
+                    <h2 class="font-syne text-xl sm:text-2xl text-on-surface font-semibold" id="inspectTitle">Floating Crystal Tower</h2>
+                </div>
+            </div>
+            <div class="p-4 rounded-xl bg-surface-container-low/60 border border-outline-variant/20 flex flex-col gap-2">
+                <span class="font-telemetry-label text-[9px] text-outline tracking-wider">NEURAL LORE & FUNCTION</span>
+                <p class="font-body-sm text-sm text-on-surface-variant leading-relaxed" id="inspectDescription">
+                    A colossal spire carved from resonant quartz that channels subconscious thoughts into tangible crystalline architecture.
+                </p>
+            </div>
+            <div class="grid grid-cols-2 gap-3 font-telemetry-label text-xs">
+                <div class="p-2.5 rounded bg-surface-container-low border border-outline-variant/20 flex flex-col">
+                    <span class="text-[9px] text-outline">RESONANCE FREQUENCY</span>
+                    <span class="text-secondary font-semibold mt-0.5" id="inspectParam1">528.0 Hz</span>
+                </div>
+                <div class="p-2.5 rounded bg-surface-container-low border border-outline-variant/20 flex flex-col">
+                    <span class="text-[9px] text-outline">ROLE / CLASSIFICATION</span>
+                    <span class="text-primary font-semibold mt-0.5" id="inspectParam2">Anchor Monolith</span>
+                </div>
+            </div>
+            <div class="flex justify-end pt-1">
+                <button onclick="focusCameraOnSelectedEntity(); closeInspectorModal();" class="px-5 py-2.5 rounded border border-primary bg-primary/20 text-primary hover:bg-primary/30 bloom-primary font-telemetry-label text-xs tracking-widest transition-all flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">center_focus_strong</span>
+                    <span>FOCUS CAMERA</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. DREAM STORY CHRONICLE MODAL -->
+    <div id="chronicleModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/85 backdrop-blur-3xl opacity-0 pointer-events-none transition-all duration-400">
+        <div class="glass-modal w-full max-w-2xl rounded-2xl p-6 sm:p-8 relative overflow-hidden flex flex-col gap-6 transform scale-95 transition-transform duration-400 max-h-[85vh] overflow-y-auto">
+            <button onclick="toggleStoryChronicle()" class="absolute top-6 right-6 text-outline hover:text-primary transition-colors p-1.5 rounded-full bg-surface-container-low border border-outline-variant/30">
+                <span class="material-symbols-outlined text-lg">close</span>
+            </button>
+            <div class="flex flex-col gap-1">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-xl">auto_stories</span>
+                    <span class="font-telemetry-label text-xs text-primary tracking-widest">AI SUBCONSCIOUS CHRONICLE</span>
+                </div>
+                <h2 class="font-syne text-2xl sm:text-3xl text-on-surface font-semibold" id="chronicleTitle">Chronicle of the Void</h2>
+                <span class="font-telemetry-label text-[10px] text-secondary" id="chronicleEnvironment">ENVIRONMENT: Luminescent Astral Expanse</span>
+            </div>
+            <div class="p-5 rounded-xl bg-surface-container-low/70 border border-outline-variant/20 font-body-md text-sm text-on-surface-variant leading-relaxed space-y-3" id="chronicleStoryContent">
+                <!-- Story text populated dynamically -->
+            </div>
+            <div class="flex flex-col gap-2">
+                <span class="font-telemetry-label text-xs text-outline tracking-wider">CHARACTERS & ENTITIES IN THIS REALM</span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="chronicleCharactersList"></div>
+            </div>
+            <div class="flex justify-end pt-2">
+                <button onclick="toggleStoryChronicle()" class="px-6 py-2.5 rounded border border-outline-variant/30 text-outline hover:text-on-surface font-telemetry-label text-xs tracking-wider transition-colors">
+                    CLOSE CHRONICLE
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. WEAVE A DREAM HUD MODAL (Manual & AI Weave) -->
+    <div id="weaveModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-2xl opacity-0 pointer-events-none transition-all duration-400">
+        <div class="glass-modal w-full max-w-2xl rounded-2xl p-6 sm:p-8 relative overflow-hidden flex flex-col gap-6 transform scale-95 transition-transform duration-400" id="weaveModalContent">
+            <button onclick="closeWeaveModal()" class="absolute top-6 right-6 text-outline hover:text-primary transition-colors p-1.5 rounded-full bg-surface-container-low border border-outline-variant/30">
+                <span class="material-symbols-outlined text-lg">close</span>
+            </button>
+            <div class="flex flex-col gap-1">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-xl">gesture</span>
+                    <span class="font-telemetry-label text-xs text-primary tracking-widest">AI SUBCONSCIOUS WEAVER</span>
+                </div>
+                <h2 class="font-syne text-2xl sm:text-3xl text-on-surface font-semibold">Weave New Dreamscape</h2>
+                <p class="font-body-sm text-sm text-on-surface-variant">Calibrate neural dimensions, atmospheric density, and brainwave harmonics.</p>
+            </div>
+
+            <!-- Parameters Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 font-telemetry-label text-xs">
+                <div class="flex flex-col gap-2 p-3.5 rounded-lg bg-surface-container-low/60 border border-outline-variant/20">
+                    <div class="flex justify-between">
+                        <span class="text-outline">FOG DENSITY</span>
+                        <span class="text-secondary" id="modalFogVal">65%</span>
+                    </div>
+                    <input type="range" min="10" max="100" value="65" class="w-full accent-[#44e2cd] cursor-pointer" oninput="document.getElementById('modalFogVal').innerText = this.value + '%'"/>
+                </div>
+
+                <div class="flex flex-col gap-2 p-3.5 rounded-lg bg-surface-container-low/60 border border-outline-variant/20">
+                    <div class="flex justify-between">
+                        <span class="text-outline">PARTICLE DENSITY</span>
+                        <span class="text-primary" id="modalParticleVal">80%</span>
+                    </div>
+                    <input type="range" min="10" max="100" value="80" class="w-full accent-[#d2bbff] cursor-pointer" oninput="document.getElementById('modalParticleVal').innerText = this.value + '%'"/>
+                </div>
+
+                <div class="flex flex-col gap-2 p-3.5 rounded-lg bg-surface-container-low/60 border border-outline-variant/20">
+                    <div class="flex justify-between">
+                        <span class="text-outline">LIGHTING INTENSITY</span>
+                        <span class="text-tertiary" id="modalLightVal">90%</span>
+                    </div>
+                    <input type="range" min="10" max="100" value="90" class="w-full accent-[#ffafd3] cursor-pointer" oninput="document.getElementById('modalLightVal').innerText = this.value + '%'"/>
+                </div>
+
+                <div class="flex flex-col gap-2 p-3.5 rounded-lg bg-surface-container-low/60 border border-outline-variant/20">
+                    <div class="flex justify-between">
+                        <span class="text-outline">ENVIRONMENT DEPTH</span>
+                        <span class="text-secondary-fixed" id="modalDepthVal">75%</span>
+                    </div>
+                    <input type="range" min="10" max="100" value="75" class="w-full accent-[#62fae3] cursor-pointer" oninput="document.getElementById('modalDepthVal').innerText = this.value + '%'"/>
+                </div>
+            </div>
+
+            <!-- Dream Prompt input in Modal -->
+            <div class="flex flex-col gap-2">
+                <span class="font-telemetry-label text-xs text-outline tracking-wider">DREAM CORE PROMPT</span>
+                <input id="modalDreamPrompt" type="text" placeholder="e.g. Floating crystalline spires above a mirror sea under two violet moons..." class="w-full px-4 py-3 rounded-lg bg-surface-container-low border border-outline-variant/30 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none font-body-sm text-sm placeholder-outline/50"/>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-2">
+                <button onclick="closeWeaveModal()" class="px-5 py-2.5 rounded border border-outline-variant/30 text-outline hover:text-on-surface font-telemetry-label text-xs tracking-wider transition-colors">
+                    CANCEL
+                </button>
+                <button onclick="synthesizeFromModal()" class="px-6 py-2.5 rounded border border-primary bg-primary/20 text-primary hover:bg-primary/30 bloom-primary font-telemetry-label text-xs tracking-widest transition-all flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">auto_fix_high</span>
+                    <span>GENERATE DREAMSCAPE</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. API KEY CONFIGURATION MODAL -->
+    <div id="apiConfigModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-2xl opacity-0 pointer-events-none transition-all duration-400">
+        <div class="glass-modal w-full max-w-md rounded-2xl p-6 relative overflow-hidden flex flex-col gap-4 transform scale-95 transition-transform duration-400">
+            <button onclick="closeApiConfigModal()" class="absolute top-5 right-5 text-outline hover:text-primary transition-colors p-1 rounded-full bg-surface-container-low border border-outline-variant/30">
+                <span class="material-symbols-outlined text-sm">close</span>
+            </button>
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-lg">key</span>
+                <h3 class="font-syne text-lg text-on-surface font-semibold">OpenAI API Configuration</h3>
+            </div>
+            <p class="font-body-sm text-xs text-on-surface-variant leading-relaxed">
+                Provide an OpenAI API key for live GPT-4o dream synthesis, or leave blank to use the built-in Neural Dream Generator.
+            </p>
+            <input id="apiKeyInput" type="password" placeholder="sk-..." class="w-full px-3.5 py-2.5 rounded bg-surface-container-low border border-outline-variant/30 text-on-surface font-mono text-xs focus:border-primary outline-none"/>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeApiConfigModal()" class="px-4 py-2 rounded text-xs font-telemetry-label text-outline hover:text-on-surface">CANCEL</button>
+                <button onclick="saveApiKey()" class="px-5 py-2 rounded bg-primary/20 border border-primary text-primary text-xs font-telemetry-label hover:bg-primary/30">SAVE KEY</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION TOAST HUD -->
+    <div id="neuralToast" class="fixed bottom-8 right-8 z-50 glass-portal rounded-lg px-4 py-3 flex items-center gap-3 border border-secondary/40 text-xs font-telemetry-label shadow-2xl transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+        <span class="w-2 h-2 rounded-full bg-secondary pulse-dot" id="toastDot"></span>
+        <span id="neuralToastText" class="text-on-surface">Neural sync established.</span>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- SCRIPTS: DREAM STATE, AI ENGINE, SHADERS & THREE.JS SCENE -->
+    <!-- ======================================================== -->
+    <script>
+        /* ------------------------------------------------------------- */
+        /* 1. Central Dream State Management & Types                     */
+        /* ------------------------------------------------------------- */
+        
+        /**
+         * Dream Data Interface:
+         * {
+         *   title: string,
+         *   description: string,
+         *   mood: string,
+         *   environment: string,
+         *   story: string,
+         *   colors: { primary: string, secondary: string, accent: string, background: string },
+         *   characters: Array<{ name: string, description: string, role: string, position: [x,y,z] }>,
+         *   objects: Array<{ name: string, type: string, description: string, position: [x,y,z] }>,
+         *   coherence: number,
+         *   stability: string,
+         *   harmonicFrequency: number,
+         *   visualParameters: { fog: number, particleDensity: number, lightingIntensity: number, environmentDepth: number }
+         * }
+         */
+
+        const DreamState = {
+            currentDream: null,
+            isGenerating: false,
+            apiKey: localStorage.getItem('AETHER_OPENAI_KEY') || '',
+            selectedEntity: null,
+            listeners: [],
+
+            subscribe(fn) {
+                this.listeners.push(fn);
+            },
+            notify() {
+                this.listeners.forEach(fn => fn(this.currentDream));
+            },
+            setDream(dream) {
+                this.currentDream = dream;
+                this.notify();
+            }
+        };
+
+        // Default Initial Dream Data (Aether Genesis)
+        const initialDream = {
+            title: "NEON ARCHIPELAGO",
+            description: "An island chain of crystallized starlight drifting across a silent, reflective void beneath twin celestial moons.",
+            mood: "Ethereal & Serene",
+            environment: "Luminescent Astral Expanse",
+            story: "In the quiet silence of the deep subconscious, islands of pure quantum light float suspended over a mirror sea. Crystalline spires emit harmonic tones, resonating with the dreams of distant worlds.",
+            colors: {
+                primary: "#7c3aed",
+                secondary: "#44e2cd",
+                accent: "#ffd8e7",
+                background: "#080c1a"
+            },
+            characters: [
+                {
+                    name: "Astral Sentinel",
+                    description: "An ancient holographic being composed of light geometry that protects dreamers from waking turbulence.",
+                    role: "Guardian of the Arch",
+                    position: [-4.2, 1.2, -1.0]
+                },
+                {
+                    name: "Echo of Alexandria",
+                    description: "A wandering manifestation of stored subconscious memories, speaking in harmonious frequencies.",
+                    role: "Subconscious Archivist",
+                    position: [4.5, -0.8, -1.5]
+                }
+            ],
+            objects: [
+                {
+                    name: "Floating Crystal Spire",
+                    type: "spire",
+                    description: "A multi-faceted monolith that focuses neural coherence and channels ambient dreamwaves.",
+                    position: [-2.5, 0.5, 0.5]
+                },
+                {
+                    name: "Chronos Gateway",
+                    type: "portal",
+                    description: "A rotating ring of energy that folds time and allows lucid transit between dream memories.",
+                    position: [3.2, 1.8, -0.8]
+                },
+                {
+                    name: "Harmonic Neural Arbor",
+                    type: "tree",
+                    description: "A crystalline bio-luminescent structure that blossoms with thoughts of forgotten wisdom.",
+                    position: [0.2, -1.8, 1.2]
+                }
+            ],
+            coherence: 96.8,
+            stability: "PRIME",
+            harmonicFrequency: 432.0,
+            visualParameters: {
+                fog: 0.65,
+                particleDensity: 0.85,
+                lightingIntensity: 1.0,
+                environmentDepth: 0.75
+            }
+        };
+
+        /* ------------------------------------------------------------- */
+        /* 2. AI Dream Generation Engine (OpenAI API + Neural Fallback)  */
+        /* ------------------------------------------------------------- */
+        
+        const AIDreamEngine = {
+            async generateDream(prompt) {
+                // If API key is available, attempt OpenAI Structured Generation
+                if (DreamState.apiKey && DreamState.apiKey.startsWith('sk-')) {
+                    try {
+                        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${DreamState.apiKey}`
+                            },
+                            body: JSON.stringify({
+                                model: 'gpt-4o-mini',
+                                messages: [
+                                    {
+                                        role: 'system',
+                                        content: `You are the AetherDream AI Neural Engine. Generate rich, structured JSON dream data based on the user's subconscious prompt. Return ONLY a raw valid JSON object with fields:
+                                        title (string), description (string), mood (string), environment (string), story (string), colors ({primary: hex, secondary: hex, accent: hex, background: hex}), characters (array of 2 objects: {name, description, role}), objects (array of 3 objects: {name, type: "spire"|"portal"|"tree"|"monolith", description}), coherence (number 70-100), stability ("PRIME"|"HARMONIC"|"QUANTUM"|"ABSOLUTE"|"UNSTABLE"), harmonicFrequency (number: 432, 528, 639, 741, 852, 963), visualParameters ({fog: 0.2-0.9, particleDensity: 0.3-1.0, lightingIntensity: 0.4-1.5, environmentDepth: 0.3-1.0}).`
+                                    },
+                                    {
+                                        role: 'user',
+                                        content: prompt
+                                    }
+                                ],
+                                response_format: { type: "json_object" },
+                                temperature: 0.8
+                            })
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            const parsed = JSON.parse(data.choices[0].message.content);
+                            return this.normalizeDreamData(parsed, prompt);
+                        }
+                    } catch (err) {
+                        console.warn("OpenAI API call failed, falling back to Neural Synthesizer:", err);
+                    }
+                }
+
+                // High-Fidelity Procedural Neural Synthesis Engine
+                await new Promise(resolve => setTimeout(resolve, 1400)); // Simulated neural quantum compute time
+                return this.synthesizeProceduralDream(prompt);
+            },
+
+            normalizeDreamData(data, prompt) {
+                // Ensure all fields and positions exist with sensible defaults
+                const positionsObj = [[-2.8, 0.6, 0.5], [3.2, 1.6, -0.8], [0.5, -1.8, 1.2]];
+                const positionsChar = [[-4.0, 1.0, -1.0], [4.2, -0.7, -1.5]];
+
+                return {
+                    title: (data.title || prompt.toUpperCase().slice(0, 24)).toUpperCase(),
+                    description: data.description || `A realm woven from: ${prompt}`,
+                    mood: data.mood || "Mystic & Resonant",
+                    environment: data.environment || "Subconscious Dimension",
+                    story: data.story || `Within this dreamscape, thought becomes form and energy resonates through the digital void.`,
+                    colors: {
+                        primary: data.colors?.primary || "#7c3aed",
+                        secondary: data.colors?.secondary || "#44e2cd",
+                        accent: data.colors?.accent || "#ffd8e7",
+                        background: data.colors?.background || "#080c1a"
+                    },
+                    characters: (data.characters || []).slice(0, 2).map((c, i) => ({
+                        name: c.name || `Entity-${i + 1}`,
+                        description: c.description || "A mysterious inhabitant of this dreamscape.",
+                        role: c.role || "Astral Traveler",
+                        position: positionsChar[i] || [0, 0, 0]
+                    })),
+                    objects: (data.objects || []).slice(0, 3).map((o, i) => ({
+                        name: o.name || `Relic ${i + 1}`,
+                        type: o.type || (i === 0 ? "spire" : (i === 1 ? "portal" : "tree")),
+                        description: o.description || "An interactive dream artifact.",
+                        position: positionsObj[i] || [0, 0, 0]
+                    })),
+                    coherence: typeof data.coherence === 'number' ? Math.min(100, Math.max(50, data.coherence)) : 94.5,
+                    stability: data.stability || "PRIME",
+                    harmonicFrequency: data.harmonicFrequency || 528.0,
+                    visualParameters: {
+                        fog: data.visualParameters?.fog || 0.65,
+                        particleDensity: data.visualParameters?.particleDensity || 0.85,
+                        lightingIntensity: data.visualParameters?.lightingIntensity || 1.0,
+                        environmentDepth: data.visualParameters?.environmentDepth || 0.75
+                    }
+                };
+            },
+
+            synthesizeProceduralDream(prompt) {
+                const lower = prompt.toLowerCase();
+                let colors = { primary: "#7c3aed", secondary: "#44e2cd", accent: "#ffd8e7", background: "#080c1a" };
+                let mood = "Ethereal & Serene";
+                let freq = 528.0;
+                let title = "LUCID SANCTUARY";
+                let objects = [];
+                let characters = [];
+
+                if (lower.includes("crystal") || lower.includes("city") || lower.includes("spire")) {
+                    colors = { primary: "#8b5cf6", secondary: "#38bdf8", accent: "#f472b6", background: "#0a0c1e" };
+                    mood = "Crystalline & Majestic";
+                    freq = 639.0;
+                    title = "CRYSTALLINE CITADEL";
+                    objects = [
+                        { name: "Prism Scriptorium", type: "spire", description: "Spire concentrating harmonic dream light.", position: [-2.8, 0.8, 0.5] },
+                        { name: "Event Horizon Arch", type: "portal", description: "An astral transit conduit between timelines.", position: [3.4, 1.5, -0.8] },
+                        { name: "Resonant Crystal Monolith", type: "tree", description: "Fractal crystal lattice holding subconscious lore.", position: [0.3, -1.7, 1.1] }
+                    ];
+                    characters = [
+                        { name: "The Crystal Weaver", description: "Architect of geometric thoughtforms.", role: "Prime Architect", position: [-3.8, 1.2, -1.0] },
+                        { name: "Chrono-Nomad", description: "Explorer wandering through shattered moments.", role: "Time Wanderer", position: [4.0, -0.6, -1.4] }
+                    ];
+                } else if (lower.includes("abyss") || lower.includes("ocean") || lower.includes("bioluminescent") || lower.includes("deep")) {
+                    colors = { primary: "#0ea5e9", secondary: "#2dd4bf", accent: "#ec4899", background: "#030b1e" };
+                    mood = "Abyssal & Luminescent";
+                    freq = 432.0;
+                    title = "BIOLUMINESCENT TRENCH";
+                    objects = [
+                        { name: "Sub-Oceanic Obelisk", type: "spire", description: "Dark obelisk radiating bioluminescent pulses.", position: [-2.6, 0.4, 0.6] },
+                        { name: "Abyssal Rift Portal", type: "portal", description: "A swirling vortex into deeper REM states.", position: [3.2, 1.7, -0.9] },
+                        { name: "Neural Biolum Tree", type: "tree", description: "Organism pulsating with synaptic waves.", position: [0.1, -1.9, 1.3] }
+                    ];
+                    characters = [
+                        { name: "Abyss Diver 07", description: "Neural explorer attuned to subconscious ocean depths.", role: "Abyssal Diver", position: [-4.1, 0.9, -1.1] },
+                        { name: "Siren of the Ether", description: "Entity singing binaural carrier waves.", role: "Tone Harbinger", position: [4.3, -0.8, -1.3] }
+                    ];
+                } else if (lower.includes("monolith") || lower.includes("void") || lower.includes("dark") || lower.includes("obsidian")) {
+                    colors = { primary: "#6366f1", secondary: "#a855f7", accent: "#38bdf8", background: "#050711" };
+                    mood = "Enigmatic & Cosmic";
+                    freq = 741.0;
+                    title = "OBSIDIAN MONOLITH";
+                    objects = [
+                        { name: "Dark Quartz Pillar", type: "spire", description: "Absorbs noise and focuses lucid clarity.", position: [-2.7, 0.7, 0.4] },
+                        { name: "Starlight Wormhole", type: "portal", description: "Interdimensional mirror gateway.", position: [3.1, 1.6, -0.7] },
+                        { name: "Quantum Dendrite", type: "tree", description: "Branching quantum memory arrays.", position: [0.4, -1.6, 1.0] }
+                    ];
+                    characters = [
+                        { name: "Void Oracle", description: "Ancient consciousness residing at the event horizon.", role: "Oracle of the Void", position: [-3.9, 1.1, -1.2] },
+                        { name: "Memory Collector", description: "Entity gathering fragmented nostalgic thoughts.", role: "Reminiscence Keeper", position: [3.9, -0.5, -1.5] }
+                    ];
+                } else {
+                    colors = { primary: "#7c3aed", secondary: "#44e2cd", accent: "#f472b6", background: "#080c1a" };
+                    mood = "Ethereal & Transcendent";
+                    freq = 528.0;
+                    title = prompt.length > 3 ? prompt.toUpperCase().slice(0, 22) : "NEURAL HARMONY";
+                    objects = [
+                        { name: "Aetherial Spire", type: "spire", description: "Focus of lucid mental energy.", position: [-2.8, 0.6, 0.5] },
+                        { name: "Astral Portal Ring", type: "portal", description: "Folded spacetime conduit.", position: [3.3, 1.6, -0.8] },
+                        { name: "Synaptic Tree", type: "tree", description: "Organic manifestation of creativity.", position: [0.2, -1.8, 1.2] }
+                    ];
+                    characters = [
+                        { name: "Lucid Guide", description: "Presence assisting in dimensional stabilization.", role: "Navigator", position: [-4.0, 1.0, -1.0] },
+                        { name: "Astral Wanderer", description: "Fellow dreamer traversing this frequency.", role: "Wanderer", position: [4.2, -0.7, -1.5] }
+                    ];
+                }
+
+                return {
+                    title,
+                    description: `A lucid realm manifested from "${prompt}"`,
+                    mood,
+                    environment: "Lucid Neural Matrix",
+                    story: `Within this dreamscape, thought translates instantly into architecture. Crystalline structures vibrate at ${freq}Hz, aligning the subconscious mind with infinite possibility.`,
+                    colors,
+                    characters,
+                    objects,
+                    coherence: 95.0 + Math.random() * 4.5,
+                    stability: "PRIME",
+                    harmonicFrequency: freq,
+                    visualParameters: {
+                        fog: 0.55 + Math.random() * 0.25,
+                        particleDensity: 0.75 + Math.random() * 0.25,
+                        lightingIntensity: 1.0 + Math.random() * 0.3,
+                        environmentDepth: 0.75 + Math.random() * 0.2
+                    }
+                };
+            }
+        };
+
+        /* ------------------------------------------------------------- */
+        /* 3. WebGL Cinematic Background Shader (Nebula, Moon, Stars)   */
+        /* ------------------------------------------------------------- */
+        let shaderCanvas, shaderGL, shaderProg, uTimeLoc, uResLoc, uMouseLoc, uPrimaryColLoc, uSecColLoc, uFogLoc, uCoherenceLoc;
+        let shaderPrimaryColor = [0.28, 0.12, 0.48];
+        let shaderSecColor = [0.05, 0.55, 0.65];
+        let shaderFogDensity = 0.65;
+        let shaderCoherence = 0.95;
+
+        (function initShaderBackground() {
+            shaderCanvas = document.getElementById('shader-canvas-ANIMATION_2');
+            if (!shaderCanvas) return;
+
+            function syncSize() {
+                const w = window.innerWidth;
+                const h = window.innerHeight;
+                if (shaderCanvas.width !== w || shaderCanvas.height !== h) {
+                    shaderCanvas.width = w;
+                    shaderCanvas.height = h;
+                }
+            }
+            window.addEventListener('resize', syncSize);
+            syncSize();
+
+            shaderGL = shaderCanvas.getContext('webgl') || shaderCanvas.getContext('experimental-webgl');
+            if (!shaderGL) return;
+
+            const vs = `
+                attribute vec2 a_position;
+                varying vec2 v_texCoord;
+                void main() {
+                    v_texCoord = a_position * 0.5 + 0.5;
+                    gl_Position = vec4(a_position, 0.0, 1.0);
+                }
+            `;
+
+            const fs = `
+                precision highp float;
+                uniform float u_time;
+                uniform vec2 u_resolution;
+                uniform vec2 u_mouse;
+                uniform vec3 u_primary_color;
+                uniform vec3 u_secondary_color;
+                uniform float u_fog_density;
+                uniform float u_coherence;
+                varying vec2 v_texCoord;
+
+                vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
+                float snoise(vec2 v){
+                    const vec4 C = vec4(0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439);
+                    vec2 i  = floor(v + dot(v, C.yy) );
+                    vec2 x0 = v -   i + dot(i, C.xx);
+                    vec2 i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+                    vec4 x12 = x0.xyxy + C.xxzz;
+                    x12.xy -= i1;
+                    i = mod(i, 289.0);
+                    vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 )) + i.x + vec3(0.0, i1.x, 1.0 ));
+                    vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+                    m = m*m; m = m*m;
+                    vec3 x = 2.0 * fract(p * C.www) - 1.0;
+                    vec3 h = abs(x) - 0.5;
+                    vec3 ox = floor(x + 0.5);
+                    vec3 a0 = x - ox;
+                    m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+                    vec3 g;
+                    g.x  = a0.x  * x0.x  + h.x  * x0.y;
+                    g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+                    return 130.0 * dot(m, g);
+                }
+
+                void main() {
+                    vec2 uv = v_texCoord;
+                    vec2 p = (gl_FragCoord.xy * 2.0 - u_resolution.xy) / min(u_resolution.x, u_resolution.y);
+                    vec2 normMouse = (u_mouse / u_resolution - 0.5) * 0.12;
+                    
+                    // Midnight deep indigo / void base
+                    vec3 color = vec3(0.015, 0.025, 0.055);
+                    
+                    // Volumetric Nebula Clouds modulated by coherence
+                    float distortion = (1.0 - u_coherence) * 2.0;
+                    float t = u_time * (0.04 + distortion * 0.05);
+                    float n1 = snoise(uv * 1.8 + vec2(t * 0.3, t * 0.2) + normMouse);
+                    float n2 = snoise(uv * 3.5 - vec2(t * 0.4, t * 0.1));
+                    float n3 = snoise(uv * 6.0 + vec2(t * 0.2, -t * 0.3));
+                    
+                    vec3 primaryBloom = u_primary_color * 0.55;
+                    vec3 secondaryBloom = u_secondary_color * 0.4;
+                    
+                    color += primaryBloom * smoothstep(0.05, 0.75, n1);
+                    color += secondaryBloom * smoothstep(0.2, 0.9, n2);
+                    color += vec3(0.12, 0.15, 0.42) * smoothstep(0.3, 0.95, n3) * 0.4;
+                    
+                    // Luminous Celestial Moon
+                    vec2 moonPos = vec2(0.35, 0.42) + normMouse * 0.5;
+                    float dMoon = length(p - moonPos);
+                    
+                    float moonCore = smoothstep(0.22, 0.21, dMoon);
+                    float moonCorona = exp(-dMoon * 2.8) * 0.7;
+                    float moonAura = exp(-dMoon * 1.1) * 0.3;
+                    
+                    float craterNoise = snoise(p * 12.0) * 0.08 + snoise(p * 24.0) * 0.04;
+                    vec3 moonColor = vec3(0.88, 0.92, 1.0) * (1.0 - craterNoise);
+                    
+                    color += moonColor * moonCore * 0.85;
+                    color += (moonColor * 0.8 + secondaryBloom * 0.5) * moonCorona;
+                    color += primaryBloom * moonAura;
+                    
+                    // Shimmering Starfield
+                    vec2 starUV = uv * 25.0;
+                    float starSeed = fract(sin(dot(floor(starUV), vec2(12.9898, 78.233))) * 43758.5453);
+                    if (starSeed > 0.96) {
+                        float starIntensity = fract(starSeed * 100.0);
+                        float twinkle = 0.5 + 0.5 * sin(u_time * 2.5 + starSeed * 6.28);
+                        vec2 starOffset = fract(starUV) - 0.5;
+                        float starDist = length(starOffset);
+                        float starGlow = smoothstep(0.12, 0.0, starDist) * twinkle * starIntensity;
+                        color += vec3(0.9, 0.95, 1.0) * starGlow * 1.6;
+                    }
+                    
+                    // Atmospheric Fog & Reflective Water at Bottom
+                    float bottomFog = smoothstep(u_fog_density * 0.7, 0.0, uv.y);
+                    vec3 fogColor = vec3(0.04, 0.08, 0.18) + secondaryBloom * 0.4;
+                    color = mix(color, fogColor, bottomFog * (0.5 + u_fog_density * 0.45));
+
+                    gl_FragColor = vec4(color, 1.0);
+                }
+            `;
+
+            function createShader(type, source) {
+                const s = shaderGL.createShader(type);
+                shaderGL.shaderSource(s, source);
+                shaderGL.compileShader(s);
+                return s;
+            }
+
+            shaderProg = shaderGL.createProgram();
+            shaderGL.attachShader(shaderProg, createShader(shaderGL.VERTEX_SHADER, vs));
+            shaderGL.attachShader(shaderProg, createShader(shaderGL.FRAGMENT_SHADER, fs));
+            shaderGL.linkProgram(shaderProg);
+            shaderGL.useProgram(shaderProg);
+
+            const buf = shaderGL.createBuffer();
+            shaderGL.bindBuffer(shaderGL.ARRAY_BUFFER, buf);
+            shaderGL.bufferData(shaderGL.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), shaderGL.STATIC_DRAW);
+
+            const pos = shaderGL.getAttribLocation(shaderProg, 'a_position');
+            shaderGL.enableVertexAttribArray(pos);
+            shaderGL.vertexAttribPointer(pos, 2, shaderGL.FLOAT, false, 0, 0);
+
+            uTimeLoc = shaderGL.getUniformLocation(shaderProg, 'u_time');
+            uResLoc = shaderGL.getUniformLocation(shaderProg, 'u_resolution');
+            uMouseLoc = shaderGL.getUniformLocation(shaderProg, 'u_mouse');
+            uPrimaryColLoc = shaderGL.getUniformLocation(shaderProg, 'u_primary_color');
+            uSecColLoc = shaderGL.getUniformLocation(shaderProg, 'u_secondary_color');
+            uFogLoc = shaderGL.getUniformLocation(shaderProg, 'u_fog_density');
+            uCoherenceLoc = shaderGL.getUniformLocation(shaderProg, 'u_coherence');
+
+            let mouseX = window.innerWidth / 2;
+            let mouseY = window.innerHeight / 2;
+            window.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = window.innerHeight - e.clientY;
+            });
+
+            function render(t) {
+                shaderGL.viewport(0, 0, shaderCanvas.width, shaderCanvas.height);
+                if (uTimeLoc) shaderGL.uniform1f(uTimeLoc, t * 0.001);
+                if (uResLoc) shaderGL.uniform2f(uResLoc, shaderCanvas.width, shaderCanvas.height);
+                if (uMouseLoc) shaderGL.uniform2f(uMouseLoc, mouseX, mouseY);
+                if (uPrimaryColLoc) shaderGL.uniform3fv(uPrimaryColLoc, shaderPrimaryColor);
+                if (uSecColLoc) shaderGL.uniform3fv(uSecColLoc, shaderSecColor);
+                if (uFogLoc) shaderGL.uniform1f(uFogLoc, shaderFogDensity);
+                if (uCoherenceLoc) shaderGL.uniform1f(uCoherenceLoc, shaderCoherence);
+
+                shaderGL.drawArrays(shaderGL.TRIANGLE_STRIP, 0, 4);
+                requestAnimationFrame(render);
+            }
+            requestAnimationFrame(render);
+        })();
+
+        /* ------------------------------------------------------------- */
+        /* 4. Three.js Living Dream Environment & Interactive Entities   */
+        /* ------------------------------------------------------------- */
+        let scene, camera, renderer, raycaster, mouseVec;
+        let crystalsGroup, particlesMesh, pointLight, cyanLight, ambientLight;
+        let spawnedObjectsGroup, spawnedCharactersGroup;
+        let interactiveMeshes = [];
+        let hoveredMesh = null;
+        let targetCamZ = 6.5;
+
+        (function initThreeScene() {
+            const container = document.getElementById('threejs-container-ANIMATION_3');
+            if (!container) return;
+
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(65, width / height, 0.1, 1000);
+            camera.position.z = targetCamZ;
+
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            raycaster = new THREE.Raycaster();
+            mouseVec = new THREE.Vector2();
+
+            // Lighting
+            ambientLight = new THREE.AmbientLight(0x303550, 1.8);
+            scene.add(ambientLight);
+
+            pointLight = new THREE.PointLight(0x7c3aed, 4.5, 60);
+            pointLight.position.set(6, 4, 6);
+            scene.add(pointLight);
+
+            cyanLight = new THREE.PointLight(0x44e2cd, 3.5, 60);
+            cyanLight.position.set(-6, -4, 5);
+            scene.add(cyanLight);
+
+            // Groups
+            crystalsGroup = new THREE.Group();
+            scene.add(crystalsGroup);
+
+            spawnedObjectsGroup = new THREE.Group();
+            scene.add(spawnedObjectsGroup);
+
+            spawnedCharactersGroup = new THREE.Group();
+            scene.add(spawnedCharactersGroup);
+
+            // Crystal Geometries
+            const octaGeo = new THREE.OctahedronGeometry(1, 0);
+            const icosaGeo = new THREE.IcosahedronGeometry(0.8, 0);
+            const tetraGeo = new THREE.TetrahedronGeometry(1.2, 0);
+
+            const crystalMat = new THREE.MeshPhysicalMaterial({
+                color: 0xffffff,
+                emissive: 0x1a1235,
+                roughness: 0.1,
+                metalness: 0.1,
+                transmission: 0.65,
+                ior: 1.5,
+                reflectivity: 0.9,
+                transparent: true,
+                opacity: 0.85,
+                flatShading: true
+            });
+
+            for (let i = 0; i < 16; i++) {
+                const geo = i % 3 === 0 ? octaGeo : (i % 3 === 1 ? icosaGeo : tetraGeo);
+                const mesh = new THREE.Mesh(geo, crystalMat.clone());
+
+                mesh.position.x = (Math.random() - 0.5) * 16;
+                mesh.position.y = (Math.random() - 0.5) * 10;
+                mesh.position.z = (Math.random() - 0.5) * 6 - 1.5;
+
+                const scale = 0.25 + Math.random() * 0.5;
+                mesh.scale.set(scale, scale * (1.2 + Math.random() * 0.5), scale);
+
+                mesh.rotation.x = Math.random() * Math.PI * 2;
+                mesh.rotation.y = Math.random() * Math.PI * 2;
+
+                mesh.userData = {
+                    baseY: mesh.position.y,
+                    speed: 0.004 + Math.random() * 0.008,
+                    rotSpeedX: (Math.random() - 0.5) * 0.015,
+                    rotSpeedY: (Math.random() - 0.5) * 0.02,
+                    floatOffset: Math.random() * Math.PI * 2
+                };
+
+                if (i % 2 === 0) {
+                    const wireGeo = new THREE.WireframeGeometry(geo);
+                    const wireMat = new THREE.LineBasicMaterial({ color: 0x44e2cd, transparent: true, opacity: 0.3 });
+                    const wireMesh = new THREE.LineSegments(wireGeo, wireMat);
+                    mesh.add(wireMesh);
+                }
+
+                crystalsGroup.add(mesh);
+            }
+
+            // Particle Cloud
+            const particlesCount = 500;
+            const posArray = new Float32Array(particlesCount * 3);
+            const colorArray = new Float32Array(particlesCount * 3);
+
+            for (let i = 0; i < particlesCount; i++) {
+                posArray[i * 3] = (Math.random() - 0.5) * 24;
+                posArray[i * 3 + 1] = (Math.random() - 0.5) * 16;
+                posArray[i * 3 + 2] = (Math.random() - 0.5) * 12;
+
+                colorArray[i * 3] = 0.27; colorArray[i * 3 + 1] = 0.88; colorArray[i * 3 + 2] = 0.8;
+            }
+
+            const particlesGeometry = new THREE.BufferGeometry();
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
+
+            const particlesMaterial = new THREE.PointsMaterial({
+                size: 0.045,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.7,
+                blending: THREE.AdditiveBlending
+            });
+
+            particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+            scene.add(particlesMesh);
+
+            // Mouse Move & Raycasting
+            let mouseSmoothX = 0, mouseSmoothY = 0;
+            window.addEventListener('mousemove', (e) => {
+                mouseVec.x = (e.clientX / window.innerWidth) * 2 - 1;
+                mouseVec.y = -(e.clientY / window.innerHeight) * 2 + 1;
+                mouseSmoothX = mouseVec.x;
+                mouseSmoothY = mouseVec.y;
+
+                // Raycast check for interactive objects
+                raycaster.setFromCamera(mouseVec, camera);
+                const intersects = raycaster.intersectObjects(interactiveMeshes, true);
+
+                if (intersects.length > 0) {
+                    let topObj = intersects[0].object;
+                    while (topObj.parent && topObj.parent !== spawnedObjectsGroup && topObj.parent !== spawnedCharactersGroup) {
+                        topObj = topObj.parent;
+                    }
+                    if (hoveredMesh !== topObj) {
+                        if (hoveredMesh && hoveredMesh.userData.onLeave) hoveredMesh.userData.onLeave();
+                        hoveredMesh = topObj;
+                        if (hoveredMesh.userData.onHover) hoveredMesh.userData.onHover();
+                        document.body.style.cursor = 'pointer';
+                    }
+                } else {
+                    if (hoveredMesh) {
+                        if (hoveredMesh.userData.onLeave) hoveredMesh.userData.onLeave();
+                        hoveredMesh = null;
+                        document.body.style.cursor = 'default';
+                    }
+                }
+            });
+
+            // Click listener for 3D entities
+            window.addEventListener('click', (e) => {
+                // Ignore clicks on UI buttons or modals
+                if (e.target.closest('button, input, form, #inspectorModal, #weaveModal, #chronicleModal, #apiConfigModal')) return;
+
+                if (hoveredMesh && hoveredMesh.userData.entityData) {
+                    openInspectorModal(hoveredMesh.userData.entityData, hoveredMesh.userData.entityType);
+                }
+            });
+
+            // Render loop
+            function animate() {
+                requestAnimationFrame(animate);
+                const time = Date.now() * 0.001;
+
+                // Smooth Parallax Camera
+                camera.position.x += (mouseSmoothX * 1.2 - camera.position.x) * 0.04;
+                camera.position.y += (mouseSmoothY * 0.8 - camera.position.y) * 0.04;
+                camera.position.z += (targetCamZ - camera.position.z) * 0.05;
+                camera.lookAt(0, 0, 0);
+
+                // Rotate Crystals
+                crystalsGroup.children.forEach(c => {
+                    c.rotation.x += c.userData.rotSpeedX;
+                    c.rotation.y += c.userData.rotSpeedY;
+                    c.position.y = c.userData.baseY + Math.sin(time * 1.2 + c.userData.floatOffset) * 0.2;
+                });
+
+                // Animate Spawned Objects & Characters
+                spawnedObjectsGroup.children.forEach(obj => {
+                    if (obj.userData.animate) obj.userData.animate(time);
+                });
+                spawnedCharactersGroup.children.forEach(char => {
+                    if (char.userData.animate) char.userData.animate(time);
+                });
+
+                // Rotate Particles
+                particlesMesh.rotation.y = time * 0.02;
+
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            window.addEventListener('resize', () => {
+                const w = window.innerWidth;
+                const h = window.innerHeight;
+                camera.aspect = w / h;
+                camera.updateProjectionMatrix();
+                renderer.setSize(w, h);
+            });
+        })();
+
+        /* ------------------------------------------------------------- */
+        /* 5. Procedural 3D Entity Builders & Spawners                  */
+        /* ------------------------------------------------------------- */
+        
+        function clearSpawnedEntities() {
+            while (spawnedObjectsGroup.children.length > 0) {
+                const obj = spawnedObjectsGroup.children[0];
+                spawnedObjectsGroup.remove(obj);
+            }
+            while (spawnedCharactersGroup.children.length > 0) {
+                const char = spawnedCharactersGroup.children[0];
+                spawnedCharactersGroup.remove(char);
+            }
+            interactiveMeshes = [];
+            hoveredMesh = null;
+        }
+
+        function spawnDreamEntities(dream) {
+            clearSpawnedEntities();
+
+            const primaryHex = parseInt(dream.colors.primary.replace('#', '0x')) || 0x7c3aed;
+            const secondaryHex = parseInt(dream.colors.secondary.replace('#', '0x')) || 0x44e2cd;
+            const accentHex = parseInt(dream.colors.accent.replace('#', '0x')) || 0xffd8e7;
+
+            // 1. Spawn Procedural Objects
+            (dream.objects || []).forEach((item, idx) => {
+                const group = new THREE.Group();
+                const pos = item.position || [idx === 0 ? -2.8 : (idx === 1 ? 3.2 : 0.4), 0.5, 0];
+                group.position.set(pos[0], pos[1], pos[2]);
+
+                let mainMesh;
+                if (item.type === 'portal') {
+                    // Portal Ring & Swirl Core
+                    const ringGeo = new THREE.TorusGeometry(1.2, 0.08, 16, 48);
+                    const ringMat = new THREE.MeshStandardMaterial({ color: secondaryHex, emissive: secondaryHex, emissiveIntensity: 0.6, roughness: 0.2, metalness: 0.8 });
+                    const ring = new THREE.Mesh(ringGeo, ringMat);
+                    group.add(ring);
+
+                    const innerGeo = new THREE.CircleGeometry(1.1, 32);
+                    const innerMat = new THREE.MeshBasicMaterial({ color: primaryHex, transparent: true, opacity: 0.55, side: THREE.DoubleSide });
+                    const innerDisk = new THREE.Mesh(innerGeo, innerMat);
+                    group.add(innerDisk);
+                    mainMesh = ring;
+                } else if (item.type === 'tree') {
+                    // Neural Dendrite Tree: Stem + Floating Energy Nodes
+                    const stemGeo = new THREE.CylinderGeometry(0.1, 0.35, 2.2, 8);
+                    const stemMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4, metalness: 0.6 });
+                    const stem = new THREE.Mesh(stemGeo, stemMat);
+                    group.add(stem);
+
+                    for (let n = 0; n < 6; n++) {
+                        const orbGeo = new THREE.SphereGeometry(0.22, 16, 16);
+                        const orbMat = new THREE.MeshStandardMaterial({ color: accentHex, emissive: accentHex, emissiveIntensity: 0.8 });
+                        const orb = new THREE.Mesh(orbGeo, orbMat);
+                        orb.position.set(
+                            Math.sin(n * 1.05) * 0.9,
+                            1.0 + Math.cos(n * 1.2) * 0.6,
+                            Math.cos(n * 1.05) * 0.9
+                        );
+                        group.add(orb);
+                    }
+                    mainMesh = stem;
+                } else {
+                    // Crystal Spire: Tall Faceted Obelisk with Levitating Ring
+                    const spireGeo = new THREE.ConeGeometry(0.7, 3.2, 6);
+                    const spireMat = new THREE.MeshPhysicalMaterial({
+                        color: primaryHex,
+                        emissive: primaryHex,
+                        emissiveIntensity: 0.4,
+                        transmission: 0.6,
+                        roughness: 0.15,
+                        metalness: 0.2,
+                        transparent: true,
+                        opacity: 0.9
+                    });
+                    const spire = new THREE.Mesh(spireGeo, spireMat);
+                    group.add(spire);
+
+                    const haloGeo = new THREE.TorusGeometry(0.9, 0.04, 16, 32);
+                    const haloMat = new THREE.MeshBasicMaterial({ color: secondaryHex });
+                    const halo = new THREE.Mesh(haloGeo, haloMat);
+                    halo.rotation.x = Math.PI / 2;
+                    group.add(halo);
+                    mainMesh = spire;
+                }
+
+                // Interactive Hover and Animation Callbacks
+                const initialScale = 0.01;
+                group.scale.set(initialScale, initialScale, initialScale);
+                gsap.to(group.scale, { x: 1, y: 1, z: 1, duration: 1.2, delay: 0.2 * idx, ease: "back.out(1.7)" });
+
+                group.userData = {
+                    entityData: item,
+                    entityType: 'object',
+                    baseY: pos[1],
+                    onHover: () => {
+                        gsap.to(group.scale, { x: 1.15, y: 1.15, z: 1.15, duration: 0.3 });
+                        showNotification(`Entity: ${item.name} [Click to inspect]`);
+                    },
+                    onLeave: () => {
+                        gsap.to(group.scale, { x: 1, y: 1, z: 1, duration: 0.3 });
+                    },
+                    animate: (t) => {
+                        group.position.y = group.userData.baseY + Math.sin(t * 1.5 + idx) * 0.15;
+                        group.rotation.y += 0.008;
+                    }
+                };
+
+                spawnedObjectsGroup.add(group);
+                interactiveMeshes.push(group);
+            });
+
+            // 2. Spawn Procedural Holographic Characters
+            (dream.characters || []).forEach((char, idx) => {
+                const group = new THREE.Group();
+                const pos = char.position || [idx === 0 ? -4.0 : 4.2, 0.8, -1.0];
+                group.position.set(pos[0], pos[1], pos[2]);
+
+                // Stylized Holographic Avatar: Floating Diamond Torso, Radiant Head & Aura Halo
+                const headGeo = new THREE.SphereGeometry(0.35, 24, 24);
+                const headMat = new THREE.MeshStandardMaterial({
+                    color: 0xffffff,
+                    emissive: secondaryHex,
+                    emissiveIntensity: 0.9,
+                    wireframe: true
+                });
+                const head = new THREE.Mesh(headGeo, headMat);
+                head.position.y = 1.1;
+                group.add(head);
+
+                const torsoGeo = new THREE.OctahedronGeometry(0.65, 0);
+                const torsoMat = new THREE.MeshPhysicalMaterial({
+                    color: primaryHex,
+                    emissive: primaryHex,
+                    emissiveIntensity: 0.5,
+                    transmission: 0.7,
+                    roughness: 0.2,
+                    transparent: true,
+                    opacity: 0.85
+                });
+                const torso = new THREE.Mesh(torsoGeo, torsoMat);
+                torso.scale.set(0.6, 1.2, 0.6);
+                group.add(torso);
+
+                const auraGeo = new THREE.RingGeometry(0.8, 0.85, 32);
+                const auraMat = new THREE.MeshBasicMaterial({ color: secondaryHex, side: THREE.DoubleSide, transparent: true, opacity: 0.6 });
+                const aura = new THREE.Mesh(auraGeo, auraMat);
+                aura.rotation.x = Math.PI / 2;
+                aura.position.y = -0.5;
+                group.add(aura);
+
+                group.scale.set(0.01, 0.01, 0.01);
+                gsap.to(group.scale, { x: 1, y: 1, z: 1, duration: 1.4, delay: 0.5 + 0.2 * idx, ease: "back.out(1.5)" });
+
+                group.userData = {
+                    entityData: char,
+                    entityType: 'character',
+                    baseY: pos[1],
+                    onHover: () => {
+                        gsap.to(group.scale, { x: 1.2, y: 1.2, z: 1.2, duration: 0.3 });
+                        showNotification(`Avatar: ${char.name} (${char.role}) [Click to inspect]`);
+                    },
+                    onLeave: () => {
+                        gsap.to(group.scale, { x: 1, y: 1, z: 1, duration: 0.3 });
+                    },
+                    animate: (t) => {
+                        group.position.y = group.userData.baseY + Math.sin(t * 1.8 + idx * 2.0) * 0.18;
+                        head.rotation.y = Math.sin(t * 1.2) * 0.4;
+                        torso.rotation.y += 0.012;
+                        aura.rotation.z += 0.015;
+                    }
+                };
+
+                spawnedCharactersGroup.add(group);
+                interactiveMeshes.push(group);
+            });
+        }
+
+        /* ------------------------------------------------------------- */
+        /* 6. Dynamic Visual Environment Mapping & Synchronization       */
+        /* ------------------------------------------------------------- */
+        
+        function hexToRgbNorm(hex) {
+            hex = hex.replace('#', '');
+            if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+            const num = parseInt(hex, 16);
+            return [(num >> 16 & 255) / 255, (num >> 8 & 255) / 255, (num & 255) / 255];
+        }
+
+        DreamState.subscribe((dream) => {
+            if (!dream) return;
+
+            // 1. Update UI Headings, Badges & Chronicle Info
+            document.getElementById('navBrandText').innerText = "AETHERDREAM";
+            document.getElementById('navSubBrand').innerText = `LUCID REALM: ${dream.title}`;
+            document.getElementById('heroTitle').innerHTML = `${dream.title} <br class="hidden sm:block"/><span class="italic text-primary font-normal text-3xl sm:text-4xl md:text-5xl block mt-1">${dream.mood}</span>`;
+            document.getElementById('dreamStorySnippet').innerText = dream.description;
+            document.getElementById('dreamMoodTag').innerText = `MOOD: ${dream.mood.toUpperCase()}`;
+            document.getElementById('lucidityBadge').innerText = `COHERENCE: ${dream.coherence.toFixed(1)}%`;
+
+            // 2. Update Telemetry Card & Smooth Counter Animations
+            animateCounter('telemetryCoherence', dream.coherence, '%');
+            document.getElementById('telemetryStability').innerText = dream.stability;
+            animateCounter('telemetryFrequency', dream.harmonicFrequency, ' Hz');
+            const depthVal = (dream.visualParameters.environmentDepth * 100).toFixed(1);
+            animateCounter('telemetryDepth', parseFloat(depthVal), '%');
+
+            document.getElementById('barCoherence').style.width = `${dream.coherence}%`;
+            document.getElementById('barStability').style.width = dream.stability === 'PRIME' ? '96%' : (dream.stability === 'ABSOLUTE' ? '92%' : '78%');
+            document.getElementById('barFrequency').style.width = `${Math.min(100, (dream.harmonicFrequency / 963) * 100)}%`;
+            document.getElementById('barDepth').style.width = `${depthVal}%`;
+
+            document.getElementById('bottomFreqIndicator').innerText = `CARRIER FREQ: ${dream.harmonicFrequency}Hz HARMONIC`;
+            document.getElementById('thetaTelemetry').innerText = `DIMENSION: ${dream.environment.toUpperCase()}`;
+
+            // 3. Update Palette Bar
+            document.getElementById('palColor1').style.backgroundColor = dream.colors.primary;
+            document.getElementById('palHex1').innerText = dream.colors.primary.toUpperCase();
+            document.getElementById('palColor2').style.backgroundColor = dream.colors.secondary;
+            document.getElementById('palHex2').innerText = dream.colors.secondary.toUpperCase();
+            document.getElementById('palColor3').style.backgroundColor = dream.colors.accent;
+            document.getElementById('palHex3').innerText = dream.colors.accent.toUpperCase();
+
+            // 4. Update Entities List on Right Column
+            updateEntitiesListUI(dream);
+
+            // 5. Update Shader Uniforms
+            const pNorm = hexToRgbNorm(dream.colors.primary);
+            const sNorm = hexToRgbNorm(dream.colors.secondary);
+            gsap.to(shaderPrimaryColor, { 0: pNorm[0], 1: pNorm[1], 2: pNorm[2], duration: 1.8 });
+            gsap.to(shaderSecColor, { 0: sNorm[0], 1: sNorm[1], 2: sNorm[2], duration: 1.8 });
+            shaderFogDensity = dream.visualParameters.fog;
+            shaderCoherence = dream.coherence / 100;
+
+            // 6. Update Three.js Lighting & Scene Depth
+            const pInt = parseInt(dream.colors.primary.replace('#', '0x')) || 0x7c3aed;
+            const sInt = parseInt(dream.colors.secondary.replace('#', '0x')) || 0x44e2cd;
+
+            gsap.to(pointLight.color, {
+                r: pNorm[0], g: pNorm[1], b: pNorm[2], duration: 1.5
+            });
+            gsap.to(cyanLight.color, {
+                r: sNorm[0], g: sNorm[1], b: sNorm[2], duration: 1.5
+            });
+
+            pointLight.intensity = 3.5 * dream.visualParameters.lightingIntensity;
+            cyanLight.intensity = 3.0 * dream.visualParameters.lightingIntensity;
+            targetCamZ = 5.5 + dream.visualParameters.environmentDepth * 2.0;
+
+            // 7. Spawn 3D Scene Interactive Entities
+            spawnDreamEntities(dream);
+
+            // 8. Adjust Ambient Sound Synthesizer frequency if active
+            if (isAudioPlaying && droneOsc1 && audioContext) {
+                const base = dream.harmonicFrequency * 0.25;
+                droneOsc1.frequency.setTargetAtTime(base, audioContext.currentTime, 0.5);
+                droneOsc2.frequency.setTargetAtTime(base + (dream.coherence > 90 ? 4.5 : 7.8), audioContext.currentTime, 0.5);
+            }
+        });
+
+        function animateCounter(id, target, suffix = '') {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const current = parseFloat(el.innerText) || 0;
+            const obj = { val: current };
+            gsap.to(obj, {
+                val: target,
+                duration: 1.2,
+                ease: "power2.out",
+                onUpdate: () => {
+                    el.innerText = obj.val.toFixed(1) + suffix;
+                }
+            });
+        }
+
+        function updateEntitiesListUI(dream) {
+            const grid = document.getElementById('entitiesGrid');
+            grid.innerHTML = '';
+
+            const allItems = [
+                ...(dream.objects || []).map(o => ({ ...o, category: '3D OBJECT', icon: o.type === 'portal' ? 'all_inclusive' : (o.type === 'tree' ? 'psychology' : 'view_in_ar') })),
+                ...(dream.characters || []).map(c => ({ ...c, category: 'AVATAR', icon: 'person' }))
+            ];
+
+            document.getElementById('entityCountBadge').innerText = `${dream.objects?.length || 0} OBJECTS • ${dream.characters?.length || 0} ENTITIES`;
+
+            allItems.forEach((item, idx) => {
+                const card = document.createElement('div');
+                card.className = "glass-portal rounded-xl p-3 group cursor-pointer hover:border-secondary/50 transition-all duration-300 flex items-center justify-between";
+                card.onclick = () => openInspectorModal(item, item.category === 'AVATAR' ? 'character' : 'object');
+
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-surface-container-low border border-outline-variant/30 flex items-center justify-center text-secondary group-hover:bg-secondary/20 transition-colors">
+                            <span class="material-symbols-outlined text-base">${item.icon}</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="font-syne text-xs text-on-surface font-semibold group-hover:text-secondary transition-colors">${item.name}</span>
+                            <span class="font-telemetry-label text-[9px] text-outline">${item.role || item.type?.toUpperCase() || 'ARTIFACT'}</span>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-outline text-sm group-hover:text-secondary group-hover:translate-x-1 transition-all">chevron_right</span>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        /* ------------------------------------------------------------- */
+        /* 7. Cinematic Dream Generation Pipeline & Transition Sequence  */
+        /* ------------------------------------------------------------- */
+        
+        async function triggerDreamSynthesis(promptText) {
+            if (!promptText || DreamState.isGenerating) return;
+            DreamState.isGenerating = true;
+
+            const submitBtn = document.getElementById('generateSubmitBtn');
+            const btnIcon = document.getElementById('genBtnIcon');
+            const btnText = document.getElementById('genBtnText');
+            const mainExp = document.getElementById('mainExperience');
+
+            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            btnIcon.innerText = "hourglass_top";
+            btnText.innerText = "WEAVING...";
+            showNotification(`Synthesizing dreamscape: "${promptText.slice(0, 30)}..."`);
+
+            // 1. Cinematic Transition: Fade UI slightly & Particle Surge
+            gsap.to(mainExp, { opacity: 0.35, duration: 0.6 });
+            gsap.to(camera.position, { z: 3.5, duration: 1.5, ease: "power3.inOut" });
+            gsap.to(pointLight, { intensity: 12, duration: 0.8, yoyo: true, repeat: 1 });
+            gsap.to(cyanLight, { intensity: 10, duration: 0.8, yoyo: true, repeat: 1 });
+
+            try {
+                // 2. Fetch or Generate Structured Dream Data
+                const newDream = await AIDreamEngine.generateDream(promptText);
+
+                // 3. Update State & Environment
+                DreamState.setDream(newDream);
+
+                // 4. Reveal Updated Environment with Camera Reset
+                gsap.to(camera.position, { z: targetCamZ, duration: 1.8, ease: "power2.out" });
+                gsap.to(mainExp, { opacity: 1, duration: 0.8, delay: 0.4 });
+
+                showNotification(`Dream materialized: ${newDream.title} [${newDream.stability}]`);
+            } catch (err) {
+                console.error("Dream generation error:", err);
+                showNotification("Subconscious link unstable. Reverting to prime realm.");
+                gsap.to(mainExp, { opacity: 1, duration: 0.5 });
+                gsap.to(camera.position, { z: targetCamZ, duration: 1.2 });
+            } finally {
+                DreamState.isGenerating = false;
+                submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                btnIcon.innerText = "auto_fix_high";
+                btnText.innerText = "SYNTHESIZE";
+            }
+        }
+
+        function handleDreamSubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('dreamPromptInput');
+            const val = input.value.trim();
+            if (val) {
+                triggerDreamSynthesis(val);
+            }
+        }
+
+        function injectDreamSeed(seed) {
+            const input = document.getElementById('dreamPromptInput');
+            input.value = "";
+            let idx = 0;
+            const timer = setInterval(() => {
+                if (idx < seed.length) {
+                    input.value += seed[idx];
+                    idx++;
+                } else {
+                    clearInterval(timer);
+                    input.focus();
+                }
+            }, 20);
+        }
+
+        function triggerExploreDive() {
+            gsap.to(camera.position, {
+                z: 2.8,
+                duration: 1.6,
+                ease: "power3.inOut",
+                onComplete: () => {
+                    gsap.to(camera.position, { z: targetCamZ, duration: 2.0, ease: "power2.out" });
+                }
+            });
+            gsap.to(pointLight, { intensity: 10, duration: 0.6, yoyo: true, repeat: 1 });
+            showNotification(`Entering ${DreamState.currentDream?.title || 'Dimension'}. Full immersion active.`);
+        }
+
+        /* ------------------------------------------------------------- */
+        /* 8. Web Audio API Binaural Harmonics Synthesizer              */
+        /* ------------------------------------------------------------- */
+        let isAudioPlaying = false;
+        let audioContext = null;
+        let droneOsc1, droneOsc2, droneGain, binauralFilter;
+
+        function toggleAudioAmbience(e) {
+            if (e) e.preventDefault();
+            const btn = document.getElementById('audioAmbienceBtn');
+            const statusText = document.getElementById('audioStatusText');
+
+            if (!isAudioPlaying) {
+                try {
+                    if (!audioContext) {
+                        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                        audioContext = new AudioCtx();
+                    }
+                    if (audioContext.state === 'suspended') audioContext.resume();
+
+                    const currentFreq = DreamState.currentDream?.harmonicFrequency || 432.0;
+                    const baseFreq = currentFreq * 0.25;
+
+                    droneGain = audioContext.createGain();
+                    droneGain.gain.setValueAtTime(0.001, audioContext.currentTime);
+                    droneGain.gain.exponentialRampToValueAtTime(0.12, audioContext.currentTime + 2.5);
+
+                    binauralFilter = audioContext.createBiquadFilter();
+                    binauralFilter.type = 'lowpass';
+                    binauralFilter.frequency.setValueAtTime(360, audioContext.currentTime);
+
+                    droneOsc1 = audioContext.createOscillator();
+                    droneOsc1.type = 'sine';
+                    droneOsc1.frequency.setValueAtTime(baseFreq, audioContext.currentTime);
+
+                    droneOsc2 = audioContext.createOscillator();
+                    droneOsc2.type = 'sine';
+                    droneOsc2.frequency.setValueAtTime(baseFreq + 4.5, audioContext.currentTime);
+
+                    droneOsc1.connect(binauralFilter);
+                    droneOsc2.connect(binauralFilter);
+                    binauralFilter.connect(droneGain);
+                    droneGain.connect(audioContext.destination);
+
+                    droneOsc1.start();
+                    droneOsc2.start();
+
+                    isAudioPlaying = true;
+                    btn.classList.remove('audio-paused');
+                    btn.classList.add('border-secondary/80', 'text-secondary');
+                    statusText.innerText = `${currentFreq}Hz ACTIVE`;
+                    showNotification(`Harmonic frequency ${currentFreq}Hz activated.`);
+                } catch (err) {
+                    console.log("Web Audio error:", err);
+                }
+            } else {
+                if (droneGain) {
+                    droneGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 1.2);
+                    setTimeout(() => {
+                        try {
+                            droneOsc1.stop();
+                            droneOsc2.stop();
+                            droneOsc1.disconnect();
+                            droneOsc2.disconnect();
+                        } catch (err) {}
+                    }, 1300);
+                }
+                isAudioPlaying = false;
+                btn.classList.add('audio-paused');
+                btn.classList.remove('border-secondary/80', 'text-secondary');
+                statusText.innerText = `432Hz HARMONIC`;
+                showNotification('Soundscape muted.');
+            }
+        }
+
+        /* ------------------------------------------------------------- */
+        /* 9. Contextual Inspector & Chronicle Modals                    */
+        /* ------------------------------------------------------------- */
+        
+        function openInspectorModal(data, type) {
+            const modal = document.getElementById('inspectorModal');
+            const content = document.getElementById('inspectorModalContent');
+
+            document.getElementById('inspectTitle').innerText = data.name;
+            document.getElementById('inspectCategory').innerText = type === 'character' ? 'HOLOGRAPHIC AVATAR' : '3D SCENE ARTIFACT';
+            document.getElementById('inspectIcon').innerText = type === 'character' ? 'person' : (data.type === 'portal' ? 'all_inclusive' : (data.type === 'tree' ? 'psychology' : 'view_in_ar'));
+            document.getElementById('inspectDescription').innerText = data.description;
+            document.getElementById('inspectParam1').innerText = `${DreamState.currentDream?.harmonicFrequency || 528} Hz`;
+            document.getElementById('inspectParam2').innerText = data.role || data.type?.toUpperCase() || "Quantum Relic";
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            content.classList.remove('scale-95');
+            content.classList.add('scale-100');
+        }
+
+        function closeInspectorModal() {
+            const modal = document.getElementById('inspectorModal');
+            const content = document.getElementById('inspectorModalContent');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+        }
+
+        function focusCameraOnSelectedEntity() {
+            triggerExploreDive();
+        }
+
+        function toggleStoryChronicle(e) {
+            if (e) e.preventDefault();
+            const modal = document.getElementById('chronicleModal');
+            const dream = DreamState.currentDream;
+            if (!dream) return;
+
+            document.getElementById('chronicleTitle').innerText = dream.title;
+            document.getElementById('chronicleEnvironment').innerText = `ENVIRONMENT: ${dream.environment.toUpperCase()} • ${dream.mood.toUpperCase()}`;
+            document.getElementById('chronicleStoryContent').innerHTML = `
+                <p>${dream.story}</p>
+                <p class="text-xs text-outline/80">Harmonic Frequency: <span class="text-secondary font-mono">${dream.harmonicFrequency}Hz</span> | Stability Index: <span class="text-primary font-mono">${dream.stability}</span> | Neural Coherence: <span class="text-secondary font-mono">${dream.coherence.toFixed(1)}%</span></p>
+            `;
+
+            const charList = document.getElementById('chronicleCharactersList');
+            charList.innerHTML = '';
+            (dream.characters || []).forEach(c => {
+                const div = document.createElement('div');
+                div.className = "p-3 rounded-lg bg-surface-container-high/60 border border-outline-variant/20 flex flex-col gap-1";
+                div.innerHTML = `<span class="text-xs font-semibold text-primary">${c.name} (${c.role})</span><span class="text-[11px] text-on-surface-variant/80">${c.description}</span>`;
+                charList.appendChild(div);
+            });
+
+            modal.classList.toggle('opacity-0');
+            modal.classList.toggle('pointer-events-none');
+        }
+
+        function openWeaveModal(e) {
+            if (e) e.preventDefault();
+            const modal = document.getElementById('weaveModal');
+            const content = document.getElementById('weaveModalContent');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            content.classList.remove('scale-95');
+            content.classList.add('scale-100');
+        }
+
+        function closeWeaveModal() {
+            const modal = document.getElementById('weaveModal');
+            const content = document.getElementById('weaveModalContent');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+        }
+
+        function synthesizeFromModal() {
+            const prompt = document.getElementById('modalDreamPrompt').value.trim();
+            closeWeaveModal();
+            triggerDreamSynthesis(prompt || "A crystalline world with floating spires and twin moons");
+        }
+
+        function openApiConfigModal() {
+            document.getElementById('apiKeyInput').value = DreamState.apiKey;
+            const modal = document.getElementById('apiConfigModal');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        function closeApiConfigModal() {
+            const modal = document.getElementById('apiConfigModal');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        function saveApiKey() {
+            const val = document.getElementById('apiKeyInput').value.trim();
+            DreamState.apiKey = val;
+            localStorage.setItem('AETHER_OPENAI_KEY', val);
+            closeApiConfigModal();
+            showNotification(val ? "OpenAI API Key synchronized." : "Neural Generator active (Key removed).");
+        }
+
+        function focusOnEntities(e) {
+            if (e) e.preventDefault();
+            document.getElementById('dimensionsSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('mobileDrawer').classList.toggle('hidden');
+        }
+
+        function resetToDreamHome() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            DreamState.setDream(initialDream);
+        }
+
+        let toastTimeout;
+        function showNotification(msg) {
+            const toast = document.getElementById('neuralToast');
+            document.getElementById('neuralToastText').innerText = msg;
+            toast.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
+            }, 3600);
+        }
+
+        // Initialize state on load
+        window.addEventListener('DOMContentLoaded', () => {
+            DreamState.setDream(initialDream);
+
+            gsap.from("#heroContent > *", {
+                y: 35,
+                opacity: 0,
+                duration: 1.1,
+                stagger: 0.12,
+                ease: "power3.out"
+            });
+            gsap.from("#dimensionsSection", {
+                x: 40,
+                opacity: 0,
+                duration: 1.2,
+                delay: 0.3,
+                ease: "power3.out"
+            });
+        });
+    </script>
+</body>
+</html>

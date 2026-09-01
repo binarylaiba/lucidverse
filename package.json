@@ -6,6 +6,7 @@
     "dev": "npm --prefix aetherdream run dev",
     "build": "npm --prefix aetherdream run build",
     "preview": "npm --prefix aetherdream run preview",
+    "typecheck": "npm --prefix aetherdream run typecheck && npm --prefix server run typecheck",
     "server:dev": "npm --prefix server run dev",
     "server:build": "npm --prefix server run build",
     "server:start": "npm --prefix server run start",
